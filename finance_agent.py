@@ -22,7 +22,8 @@ load_dotenv()
 openai_key = os.getenv("OPENAI_API_KEY")
 tavily = os.getenv("TAVILY_API_KEY")
 
-llm_name = "gpt-3.5-turbo"
+# llm_name = "gpt-3.5-turbo"
+llm_name = "gpt-4o"
 model = ChatOpenAI(api_key=openai_key, model=llm_name)
 
 from tavily import TavilyClient
@@ -219,12 +220,38 @@ def main():
         final_state = None
         for s in graph.stream(initial_state, thread):
             st.markdown("### Resultado da Análise")
-            st.json(s)
-            final_state = s
+            if "gather_financials" in s:
+                financial_data = s["gather_financials"]["financial_data"]
+                st.markdown("#### Dados Financeiros Coletados")
+                st.markdown(financial_data)
 
-        if final_state and "report" in final_state:
-            st.markdown("## Relatório Final")
-            st.write(final_state["report"])
+            if "analyze_data" in s:
+                analysis = s["analyze_data"]["analysis"]
+                st.markdown("#### Análise dos Dados Financeiros")
+                st.markdown(analysis)
+
+            if "research_competitors" in s:
+                competitors_data = s["research_competitors"]["content"]
+                st.markdown("#### Pesquisa sobre Concorrentes")
+                for i, content in enumerate(competitors_data):
+                    st.markdown(f"**Concorrente {i + 1}:** {content}")
+
+            if "compare_performance" in s:
+                comparison = s["compare_performance"]["comparison"]
+                st.markdown("#### Comparação de Desempenho")
+                st.markdown(comparison)
+
+            if "collect_feedback" in s:
+                feedback = s["collect_feedback"]["feedback"]
+                st.markdown("#### Feedback sobre a Comparação")
+                st.markdown(feedback)
+
+            if "write_report" in s:
+                report = s["write_report"]["report"]
+                st.markdown("## Relatório Final")
+                st.markdown(report)
+            
+            final_state = s
 
 if __name__ == "__main__":
     main()
